@@ -3,21 +3,14 @@ package main
 import (
 	"time"
 
-	"github.com/nsf/termbox-go"
 	"snake/internal/application"
 	"snake/internal/core"
 	"snake/internal/infrastructure"
 )
 
 func main() {
-	err := termbox.Init()
-	if err != nil {
-		panic(err)
-	}
-	defer termbox.Close()
-
 	gameService := application.NewGameService(40, 20)
-	adapter := infrastructure.NewTerminalAdapter(gameService)
+	adapter := infrastructure.NewGUIAdapter(gameService)
 
 	input := make(chan core.Direction)
 	go func() {
@@ -26,10 +19,11 @@ func main() {
 		}
 	}()
 
-	gameLoop(gameService, adapter, input)
+	go gameLoop(gameService, adapter, input)
+	adapter.Run()
 }
 
-func gameLoop(service *application.GameService, adapter *infrastructure.TerminalAdapter, input chan core.Direction) {
+func gameLoop(service *application.GameService, adapter *infrastructure.GUIAdapter, input chan core.Direction) {
 	for !service.GetState().GameOver {
 		select {
 		case dir := <-input:
@@ -47,18 +41,4 @@ func gameLoop(service *application.GameService, adapter *infrastructure.Terminal
 
 	// Handle game over
 	adapter.Render(service.GetState())
-	waitForEsc()
-}
-
-func waitForEsc() {
-	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			if ev.Key == termbox.KeyEsc {
-				return
-			}
-		case termbox.EventError:
-			panic(ev.Err)
-		}
-	}
 }
