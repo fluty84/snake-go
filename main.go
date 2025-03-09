@@ -27,8 +27,9 @@ func gameLoop(service *application.GameService, adapter *infrastructure.GUIAdapt
 	for !service.GetState().GameOver {
 		select {
 		case dir := <-input:
-			if dir == -1 {
-				return
+			if dir == -2 {
+				service.Reset()
+				continue
 			}
 			service.ChangeDirection(dir)
 		default:
@@ -39,6 +40,13 @@ func gameLoop(service *application.GameService, adapter *infrastructure.GUIAdapt
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	// Handle game over
-	adapter.Render(service.GetState())
+	// Handle game over and restart
+	for {
+		dir := <-input
+		if dir == -2 {
+			service.Reset()
+			gameLoop(service, adapter, input)
+			return
+		}
+	}
 }

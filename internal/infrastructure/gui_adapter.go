@@ -43,8 +43,8 @@ func NewGUIAdapter(game core.Game) *GUIAdapter {
 			adapter.inputChan <- core.Left
 		case fyne.KeyRight:
 			adapter.inputChan <- core.Right
-		case fyne.KeyEscape:
-			adapter.inputChan <- core.Direction(-1)
+		case fyne.KeyR:
+			adapter.inputChan <- core.Direction(-2)
 		}
 	})
 
@@ -91,7 +91,7 @@ func (g *GUIAdapter) Render(state core.GameState) {
 	g.content.Add(foodRect)
 
 	if state.GameOver {
-		overText := canvas.NewText("Game Over! Press ESC to quit", color.RGBA{R: 255, A: 255})
+		overText := canvas.NewText("Game Over! Press R to restart", color.RGBA{R: 255, A: 255})
 		overText.Alignment = fyne.TextAlignCenter
 		overText.Resize(fyne.NewSize(300, 30))
 		overText.Move(fyne.NewPos(
